@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <windows.h>
+#include <string>
 #include <cstring>
 using namespace std;
 
@@ -89,12 +90,25 @@ void orderHistory(char username[])
 {
     fileSystem.open(usernamePath(username), ios::in | ios::binary);
     order tmpOrder;
+    cout << endl;
+    cout << "Food Name                "
+         << "Quantity                 "
+         << "Price" << endl;
+    cout << "----------------------------------------------------------------------------" << endl;
     while (fileSystem.read((char *)&tmpOrder, sizeof(order)))
     {
-        cout << tmpOrder.foodname << endl;
-        cout << tmpOrder.price << endl;
-        cout << tmpOrder.countity << endl;
-        cout << "-------------------------" << endl;
+        int n = strlen(tmpOrder.foodname);
+        cout << tmpOrder.foodname;
+        for (int j = n; j < 25; j++)
+            cout << " ";
+        cout << tmpOrder.countity;
+        string cnt = to_string(tmpOrder.countity);
+        int m = cnt.size();
+        for (int j = m; j < 25; j++)
+            cout << " ";
+        cout << tmpOrder.price;
+        cout << endl;
+        cout << "----------------------------------------------------------------------------" << endl;
     }
     system("pause");
 }
@@ -111,12 +125,12 @@ void registerUser()
     fileSystem.write((char *)&userObj, sizeof(Users));
     fileSystem.close();
     system("echo Registered successfully");
-    getchar();
+    Sleep(1000);
 }
 
 void login()
 {
-    cout << "    ** Register **" << endl;
+    cout << "    ** Login **" << endl;
     Users inpObj, fileObj;
     printf("%-10s : ", "Username");
     inpObj.putUsername();
