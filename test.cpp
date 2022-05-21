@@ -23,25 +23,32 @@ public:
     }
 };
 
+string filePath = "data";
+
+// char *usernamePath(char username[])
+// {
+//     string userPath = "/data/" + username + ".bin";
+//     char *final = new char[userPath.size() + 1];
+//     strcpy(final, userPath.c_str());
+//     return final;
+// }
+
+char *intoUserData(char username[])
+{
+    static char fileName[100];
+    strcpy(fileName, "");
+    strcat(fileName, "data/");
+    strcat(fileName, username);
+    strcat(fileName, ".bin");
+    return fileName;
+}
+
 int main()
 {
-    common obj;
-    fstream myfile;
-    string nm, ad;
-    int ag;
-    myfile.open("myText.bin", ios::out | ios::binary);
-
-    // for (int i = 0; i < 3; i++)
-    // {
-    obj.getInp();
-    myfile.write((char *)&obj, sizeof(common));
-    // }
-    myfile.close();
-    myfile.open("myText.bin", ios::in | ios::binary);
-    while (myfile.read((char *)&obj, sizeof(common)))
-    {
-        obj.display();
-    }
-    myfile.close();
+    fstream file;
+    char username[] = "Ibrahim";
+    // cout << usernamePath(username) << endl;
+    file.open(intoUserData(username), ios::app);
+    file.close();
     return 0;
 }

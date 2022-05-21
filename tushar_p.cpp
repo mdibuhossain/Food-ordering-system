@@ -28,17 +28,33 @@ public:
 class order
 {
 public:
-    string foodname;
+    char foodname[50];
     long int price;
     int countity;
+    void putFoodname(char fname[])
+    {
+        strcpy(foodname, fname);
+    }
 };
 class information
 {
 public:
-    string name;
-    long long int number;
-    string address;
-    string del;
+    char number[15];
+    char address[100];
+    char delivery[50];
+    void putNumber()
+    {
+        cin.ignore();
+        cin.getline(number, 15);
+    }
+    void putAddress()
+    {
+        cin.getline(address, 100);
+    }
+    void putDelivery(char del[])
+    {
+        strcpy(delivery, del);
+    }
 };
 information person;
 order ab[100];
@@ -47,19 +63,41 @@ fstream fileSystem;
 string filePath = "data";
 int t = 0;
 long long int sum = 0;
-void menu();
-void breakfast();
-void rice();
-void chicken();
-void burger();
-void cake();
+void menu(char[]);
+void breakfast(char[]);
+void rice(char[]);
+void chicken(char[]);
+void burger(char[]);
+void cake(char[]);
+void info(char[]);
+void oder_list(char[]);
+void orderHistory(char[]);
 void registerUser();
 void login();
 
-// char *usernamePath(char username[])
-// {
-//     string userPaht = "/" + filePath;
-// }
+char *usernamePath(char username[])
+{
+    static char userPath[100];
+    strcpy(userPath, "");
+    strcat(userPath, "data/");
+    strcat(userPath, username);
+    strcat(userPath, ".bin");
+    return userPath;
+}
+
+void orderHistory(char username[])
+{
+    fileSystem.open(usernamePath(username), ios::in | ios::binary);
+    order tmpOrder;
+    while (fileSystem.read((char *)&tmpOrder, sizeof(order)))
+    {
+        cout << tmpOrder.foodname << endl;
+        cout << tmpOrder.price << endl;
+        cout << tmpOrder.countity << endl;
+        cout << "-------------------------" << endl;
+    }
+    system("pause");
+}
 
 void registerUser()
 {
@@ -91,7 +129,8 @@ void login()
         if (!strcmp(fileObj.username, inpObj.username) && !strcmp(fileObj.password, inpObj.password))
         {
             flag = false;
-            menu();
+            fileSystem.close();
+            menu(inpObj.username);
         }
     }
     if (flag)
@@ -105,53 +144,69 @@ void login()
     }
 }
 
-void menu()
+void menu(char username[])
 {
-    system("cls");
-    cout << "       **Menu**       " << endl;
-    cout << "1. Breakfast" << endl;
-    cout << "2. Rice Bowl" << endl;
-    cout << "3. Chicken" << endl;
-    cout << "4. Burger" << endl;
-    cout << "5. Cake" << endl;
-    cout << "6. Logout" << endl;
-    cout << endl;
-    cout << "    Choose Your Option   " << endl;
-    int n;
-    cin >> n;
-    switch (n)
+    while (true)
     {
-    case 1:
-        breakfast();
-        break;
-    case 2:
-        rice();
-        break;
-    case 3:
-        chicken();
-        break;
-    case 4:
-        burger();
-        break;
-    case 5:
-        cake();
-        break;
-    case 6:
-        return;
-    default:
-        cout << "Invalid command" << endl;
-        Sleep(1000);
-        break;
+    loggedInmenu:
+        system("cls");
+        cout << "       **Menu**       " << endl;
+        cout << "1. Breakfast" << endl;
+        cout << "2. Rice Bowl" << endl;
+        cout << "3. Chicken" << endl;
+        cout << "4. Burger" << endl;
+        cout << "5. Cake" << endl;
+        cout << "6. Order History" << endl;
+        cout << "7. Logout" << endl;
+        cout << endl;
+        cout << "    Choose Your Option   " << endl;
+        int n;
+        cin >> n;
+        switch (n)
+        {
+        case 1:
+            system("cls");
+            breakfast(username);
+            break;
+        case 2:
+            system("cls");
+            rice(username);
+            break;
+        case 3:
+            system("cls");
+            chicken(username);
+            break;
+        case 4:
+            system("cls");
+            burger(username);
+            break;
+        case 5:
+            system("cls");
+            cake(username);
+            break;
+        case 6:
+            system("cls");
+            orderHistory(username);
+            break;
+        case 7:
+            system("cls");
+            return;
+        default:
+            cout << "Invalid command" << endl;
+            Sleep(1000);
+            goto loggedInmenu;
+            break;
+        }
     }
 }
 
-void order_list()
+void order_list(char username[])
 {
     cout << "              **Foodpanda**               " << endl;
-    cout << "Name : " << person.name << "                    "
-         << "Phone number : 0" << person.number << endl;
+    cout << "Name : " << username << "                    "
+         << "Phone number : " << person.number << endl;
     cout << "Address : " << person.address << "                 "
-         << "Delivery system : " << person.del << endl;
+         << "Delivery system : " << person.delivery << endl;
     cout << "............................................................................" << endl;
     cout << "Food Name                "
          << "Quantity & Price         "
@@ -159,7 +214,7 @@ void order_list()
 
     for (int i = 0; i < t; i++)
     {
-        int n = ab[i].foodname.size();
+        int n = strlen(ab[i].foodname);
 
         cout << i + 1 << ". " << ab[i].foodname;
         for (int j = n; j <= 25; j++)
@@ -171,6 +226,7 @@ void order_list()
     cout << "............................................................................" << endl;
     cout << "                                             Total Bill = " << sum << endl;
     cout << endl;
+inpConfirm:
     cout << "1. Confirm Order" << endl;
     cout << "2. Cancel" << endl;
     int m;
@@ -179,39 +235,62 @@ void order_list()
     cout << endl;
 
     if (m == 1)
-        cout << "Oder Confirm Successfully. Thank You For Order. Wait only 30 minutes to get it." << endl;
-    else
+    {
+        fileSystem.open(usernamePath(username), ios::app | ios::binary);
+        for (int i = 0; i < t; i++)
+        {
+            fileSystem.write((char *)&ab[i], sizeof(order));
+        }
+        fileSystem.close();
+        cout
+            << "Oder Confirm Successfully. Thank You For Order. Wait only 30 minutes to get it." << endl;
+        t = 0;
+    }
+    else if (m == 2)
+    {
+        t = 0;
         cout << "Order Successfully Cancel." << endl;
+    }
+    else
+    {
+        puts("\nInvalid command\n\n");
+        goto inpConfirm;
+    }
+    t = 0;
     cout << endl;
 }
-void info()
+void info(char username[])
 {
 
     cout << "Please give your information : " << endl;
-    cout << "Name : ";
-    cin >> person.name;
-    cout << endl;
+    // cout << "Name : ";
+    // cin >> person.name;
+    // cout << endl;
     cout << "Phone number : ";
-    cin >> person.number;
+    person.putNumber();
     cout << endl;
     cout << "Address : ";
-    cin >> person.address;
+    person.putAddress();
     cout << endl;
+deliveryInp:
     cout << "Delivery system : " << endl;
     cout << "1. Cash on Delivery" << endl;
     int n;
     cin >> n;
     if (n == 1)
-        person.del = "Cash on Delivery";
+        person.putDelivery("Cash on Delivery");
+    else
+        goto deliveryInp;
     cout << endl;
     cout << endl;
     cout << "         Check your order" << endl;
     cout << endl;
-    order_list();
+    order_list(username);
 }
 
-void breakfast()
+void breakfast(char username[])
 {
+breakfastInp:
     cout << "-->Breakfast        --->Price" << endl;
     cout << "1. Berries              150/-" << endl;
     cout << "2. Cold Cereal          125/-" << endl;
@@ -223,45 +302,56 @@ void breakfast()
     cin >> n;
     if (n == 1)
     {
-        ab[t].foodname = "Berries";
+        ab[t].putFoodname("Berries");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 150;
     }
     else if (n == 2)
     {
-        ab[t].foodname = "Cold Cereal";
+        ab[t].putFoodname("Cold Cereal");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 125;
     }
     else if (n == 3)
     {
-        ab[t].foodname = "Egg";
+        ab[t].putFoodname("Egg");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 20;
     }
     else if (n == 4)
     {
-        ab[t].foodname = "Peanut Butter";
+        ab[t].putFoodname("Peanut Butter");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 50;
     }
+    else
+    {
+        system("echo Invalid command");
+        Sleep(1000);
+        system("cls");
+        goto breakfastInp;
+    }
     cout << "Order add successfully" << endl;
+moreBreakfastItem:
     cout << "Do you want more items?" << endl;
     cout << "1. Yes" << endl;
     cout << "2. Exit" << endl;
     int m;
     cin >> m;
     if (m == 1)
-        menu();
+        goto breakfastInp;
+    else if (m == 2)
+        info(username);
     else
-        info();
+        goto moreBreakfastItem;
 }
-void rice()
+void rice(char username[])
 {
+riceInp:
     cout << "-->Rice Bowl              --->Price" << endl;
     cout << "1. Butter Chicken rice         350/-" << endl;
     cout << "2. Chicken Briyani             425/-" << endl;
@@ -274,52 +364,63 @@ void rice()
     cin >> n;
     if (n == 1)
     {
-        ab[t].foodname = "Butter Chicken rice";
+        ab[t].putFoodname("Butter Chicken rice");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 350;
     }
     else if (n == 2)
     {
-        ab[t].foodname = "Chicken Briyani";
+        ab[t].putFoodname("Chicken Briyani");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 425;
     }
     else if (n == 3)
     {
-        ab[t].foodname = "Rice Bowl";
+        ab[t].putFoodname("Rice Bowl");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 220;
     }
     else if (n == 4)
     {
-        ab[t].foodname = "Veg Briyani";
+        ab[t].putFoodname("Veg Briyani");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 180;
     }
-    else
+    else if (n == 5)
     {
-        ab[t].foodname = "Plain Rice";
+        ab[t].putFoodname("Plain Rice");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 50;
     }
+    else
+    {
+        system("echo Invalid command");
+        Sleep(1000);
+        system("cls");
+        goto riceInp;
+    }
     cout << "Order add successfully" << endl;
+moreRiceItem:
     cout << "Do you want more items?" << endl;
     cout << "1. Yes" << endl;
     cout << "2. Exit" << endl;
     int m;
     cin >> m;
     if (m == 1)
-        menu();
+        goto riceInp;
+    else if (m == 2)
+        info(username);
     else
-        info();
+        goto moreRiceItem;
 }
-void chicken()
+void chicken(char username[])
 {
+chickenInp:
     cout << "-->Chicken              --->Price" << endl;
     cout << "1. Finger Chicken            180/-" << endl;
     cout << "2. Chicken Grilled            425/-" << endl;
@@ -332,52 +433,63 @@ void chicken()
     cin >> n;
     if (n == 1)
     {
-        ab[t].foodname = "Finger Chicken";
+        ab[t].putFoodname("Finger Chicken");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 180;
     }
     else if (n == 2)
     {
-        ab[t].foodname = "Chicken Grilled";
+        ab[t].putFoodname("Chicken Grilled");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 425;
     }
     else if (n == 3)
     {
-        ab[t].foodname = "Chicken Marsala";
+        ab[t].putFoodname("Chicken Marsala");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 220;
     }
     else if (n == 4)
     {
-        ab[t].foodname = "Chicken Prame";
+        ab[t].putFoodname("Chicken Prame");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 180;
     }
-    else
+    else if (n == 5)
     {
-        ab[t].foodname = "Chicken Wrap";
+        ab[t].putFoodname("Chicken Wrap");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 170;
     }
+    else
+    {
+        system("echo Invalid command");
+        Sleep(1000);
+        system("cls");
+        goto chickenInp;
+    }
     cout << "Order add successfully" << endl;
+moreChickenItem:
     cout << "Do you want more items?" << endl;
     cout << "1. Yes" << endl;
     cout << "2. Exit" << endl;
     int m;
     cin >> m;
     if (m == 1)
-        menu();
+        goto chickenInp;
+    else if (m == 2)
+        info(username);
     else
-        info();
+        goto moreChickenItem;
 }
-void burger()
+void burger(char username[])
 {
+burgerInp:
     cout << "-->Burger                 --->Price" << endl;
     cout << "1. Mushroom Burger            200/-" << endl;
     cout << "2. Grilled Chicken Burger     160/-" << endl;
@@ -390,52 +502,63 @@ void burger()
     cin >> n;
     if (n == 1)
     {
-        ab[t].foodname = "Mushroom Burger";
+        ab[t].putFoodname("Mushroom Burger");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 220;
     }
     else if (n == 2)
     {
-        ab[t].foodname = "Grilled Chicken Burger";
+        ab[t].putFoodname("Grilled Chicken Burger");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 160;
     }
     else if (n == 3)
     {
-        ab[t].foodname = "Spicy Blast Burger";
+        ab[t].putFoodname("Spicy Blast Burger");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 200;
     }
     else if (n == 4)
     {
-        ab[t].foodname = "Crispy Chicken Burger";
+        ab[t].putFoodname("Crispy Chicken Burger");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 150;
     }
-    else
+    else if (n == 5)
     {
-        ab[t].foodname = "Smoked B.B.Q. Burger";
+        ab[t].putFoodname("Smoked B.B.Q. Burger");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 180;
     }
+    else
+    {
+        system("echo Invalid command");
+        Sleep(1000);
+        system("cls");
+        goto burgerInp;
+    }
     cout << "Order add successfully" << endl;
+moreBurgerItem:
     cout << "Do you want more items?" << endl;
     cout << "1. Yes" << endl;
     cout << "2. Exit" << endl;
     int m;
     cin >> m;
     if (m == 1)
-        menu();
+        goto burgerInp;
+    else if (m == 2)
+        info(username);
     else
-        info();
+        goto moreBurgerItem;
 }
-void cake()
+void cake(char username[])
 {
+cakeInp:
     cout << "--->Cake                   --->Price" << endl;
     cout << "1. Black Forest Galeau         50/-" << endl;
     cout << "2. Eggless Truffle             25/-" << endl;
@@ -447,43 +570,52 @@ void cake()
     cin >> n;
     if (n == 1)
     {
-        ab[t].foodname = "Black Forest Galeau";
+        ab[t].putFoodname("Black Forest Galeau");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 50;
     }
     else if (n == 2)
     {
-        ab[t].foodname = "Eggless Truffle";
+        ab[t].putFoodname("Eggless Truffle");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 25;
     }
     else if (n == 3)
     {
-        ab[t].foodname = "Coffee Cake";
+        ab[t].putFoodname("Coffee Cake");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 80;
     }
     else if (n == 4)
     {
-        ab[t].foodname = "Fudgy Chocolate";
+        ab[t].putFoodname("Fudgy Chocolate");
         cout << "How many you want?" << endl;
         cin >> ab[t].countity;
         ab[t++].price = 30;
     }
-
+    else
+    {
+        system("echo Invalid command");
+        Sleep(1000);
+        system("cls");
+        goto cakeInp;
+    }
     cout << "Order add successfully" << endl;
+moreCakeItem:
     cout << "Do you want more items?" << endl;
     cout << "1. Yes" << endl;
     cout << "2. Exit" << endl;
     int m;
     cin >> m;
     if (m == 1)
-        menu();
+        goto cakeInp;
+    else if (m == 2)
+        info(username);
     else
-        info();
+        goto moreCakeItem;
 }
 
 int main()
