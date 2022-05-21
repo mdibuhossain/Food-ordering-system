@@ -1,7 +1,34 @@
 #include <iostream>
+#include <fstream>
 #include <windows.h>
 using namespace std;
 
+class Users
+{
+public:
+    char username[50];
+    char password[80];
+};
+class order
+{
+public:
+    string foodname;
+    long int price;
+    int countity;
+};
+class information
+{
+public:
+    string name;
+    long long int number;
+    string address;
+    string del;
+};
+information person;
+order ab[100];
+
+fstream fileSystem;
+string filePath = "data";
 int t = 0;
 long long int sum = 0;
 void breakfast();
@@ -9,6 +36,16 @@ void rice();
 void chicken();
 void burger();
 void cake();
+void registerUser();
+
+void registerUser()
+{
+    cout << "    ** Register **" << endl;
+    Users userObj;
+    fileSystem.open("data/bal", ios::app | ios::binary);
+    system("pause");
+}
+
 void menu()
 {
     cout << "       **Menu**       " << endl;
@@ -19,7 +56,7 @@ void menu()
     cout << "5. Cake" << endl;
     cout << "6. Logout" << endl;
     cout << endl;
-    cout << "     Choose Your Option   " << endl;
+    cout << "    Choose Your Option   " << endl;
     int n;
     cin >> n;
     switch (n)
@@ -47,24 +84,7 @@ void menu()
         break;
     }
 }
-class order
-{
 
-public:
-    string foodname;
-    long int price;
-    int countity;
-};
-class information
-{
-public:
-    string name;
-    long long int number;
-    string address;
-    string del;
-};
-information person;
-order ab[100];
 void order_list()
 {
     cout << "              **Foodpanda**               " << endl;
@@ -410,8 +430,36 @@ int main()
 {
     while (true)
     {
+        string path = "md " + filePath;
+        char *pathChar = &path[0];
+        system(pathChar);
         system("cls");
         cout << "    **Foodpanda**     " << endl;
-        menu();
+        cout << "    **Homepage**     " << endl;
+        cout << "1. Login" << endl;
+        cout << "2. Register" << endl;
+        cout << "3. Exit" << endl;
+        cout << endl;
+        cout << "    Choose Your Option   " << endl;
+        int inp;
+        cin >> inp;
+        switch (inp)
+        {
+        case 1:
+
+            cout << "bal" << endl;
+            break;
+        case 2:
+            registerUser();
+            cout << "bal" << endl;
+            break;
+        case 3:
+            exit(0);
+        default:
+            cout << "Invalid command" << endl;
+            Sleep(1000);
+            break;
+        }
     }
+    return 0;
 }
