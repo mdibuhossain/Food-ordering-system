@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <windows.h>
+#include <cstring>
 using namespace std;
 
 class Users
@@ -8,6 +9,21 @@ class Users
 public:
     char username[50];
     char password[80];
+    void putUsername()
+    {
+        cin.ignore();
+        cin.getline(username, 50);
+    }
+    void putPassword()
+    {
+        // cin.ignore();
+        cin.getline(password, 80);
+    }
+    void display()
+    {
+        cout << username << endl
+             << password << endl;
+    }
 };
 class order
 {
@@ -31,23 +47,67 @@ fstream fileSystem;
 string filePath = "data";
 int t = 0;
 long long int sum = 0;
+void menu();
 void breakfast();
 void rice();
 void chicken();
 void burger();
 void cake();
 void registerUser();
+void login();
+
+// char *usernamePath(char username[])
+// {
+//     string userPaht = "/" + filePath;
+// }
 
 void registerUser()
 {
     cout << "    ** Register **" << endl;
     Users userObj;
-    fileSystem.open("data/bal", ios::app | ios::binary);
-    system("pause");
+    printf("%-10s : ", "Username");
+    userObj.putUsername();
+    printf("%-10s : ", "Password");
+    userObj.putPassword();
+    fileSystem.open("data/users.bin", ios::app | ios::binary);
+    fileSystem.write((char *)&userObj, sizeof(Users));
+    fileSystem.close();
+    system("echo Registered successfully");
+    getchar();
+}
+
+void login()
+{
+    cout << "    ** Register **" << endl;
+    Users inpObj, fileObj;
+    printf("%-10s : ", "Username");
+    inpObj.putUsername();
+    printf("%-10s : ", "Password");
+    inpObj.putPassword();
+    fileSystem.open("data/users.bin", ios::in | ios::binary);
+    bool flag = true;
+    while (fileSystem.read((char *)&fileObj, sizeof(Users)))
+    {
+        if (!strcmp(fileObj.username, inpObj.username) && !strcmp(fileObj.password, inpObj.password))
+        {
+            flag = false;
+            menu();
+        }
+    }
+    if (flag)
+    {
+        cout << "Incorrect username or password" << endl
+             << "Try again" << endl
+             << endl
+             << endl
+             << endl;
+        system("pause");
+    }
 }
 
 void menu()
 {
+    system("cls");
     cout << "       **Menu**       " << endl;
     cout << "1. Breakfast" << endl;
     cout << "2. Rice Bowl" << endl;
@@ -446,14 +506,16 @@ int main()
         switch (inp)
         {
         case 1:
-
-            cout << "bal" << endl;
+            system("cls");
+            login();
             break;
         case 2:
+            system("cls");
             registerUser();
             cout << "bal" << endl;
             break;
         case 3:
+            system("cls");
             exit(0);
         default:
             cout << "Invalid command" << endl;
