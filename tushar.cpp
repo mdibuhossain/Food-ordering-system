@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 #include <cstring>
+#include <conio.h>
 using namespace std;
 
 class Users
@@ -135,7 +136,25 @@ void login()
     printf("%-10s : ", "Username");
     inpObj.putUsername();
     printf("%-10s : ", "Password");
-    inpObj.putPassword();
+
+    int ch, i = 0;
+    while (1)
+    {
+        ch = getch();
+        if (ch == 13)
+            break;
+        else if (ch == 8)
+        {
+            i--;
+            printf("*");
+            continue;
+        }
+        else
+            printf("*");
+        inpObj.password[i++] = (char)ch;
+    }
+    inpObj.password[i] = '\0';
+
     fileSystem.open("data/users.bin", ios::in | ios::binary);
     bool flag = true;
     while (fileSystem.read((char *)&fileObj, sizeof(Users)))
@@ -149,7 +168,9 @@ void login()
     }
     if (flag)
     {
-        cout << "Incorrect username or password" << endl
+        cout << endl
+             << endl
+             << "Incorrect username or password" << endl
              << "Try again" << endl
              << endl
              << endl
