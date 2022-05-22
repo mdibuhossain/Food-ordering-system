@@ -298,9 +298,16 @@ inpConfirm:
             fileSystem.write((char *)&ab[i], sizeof(order));
         }
         fileSystem.close();
-        cout
-            << "Oder Confirm Successfully. Thank You For Order. Wait only 30 minutes to get it." << endl;
         t = 0;
+        system("cls");
+        cout << "========================================" << endl
+             << "|                                      |" << endl
+             << "|\tOder Confirm Successfully      |" << endl
+             << "|\t   Thank You For Order         |" << endl
+             << "|    Wait only 30 minutes to get it    |" << endl
+             << "|                                      |" << endl
+             << "========================================" << endl;
+        Sleep(1000);
     }
     else if (m == 2)
     {
