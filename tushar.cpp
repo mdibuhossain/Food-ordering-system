@@ -121,10 +121,31 @@ void registerUser()
     printf("%-10s : ", "Username");
     userObj.putUsername();
     printf("%-10s : ", "Password");
-    userObj.putPassword();
+
+    int ch, i = 0;
+    while (1)
+    {
+        ch = getch();
+        if (ch == 13)
+            break;
+        else if (ch == 8)
+        {
+            i--;
+            printf("*");
+            continue;
+        }
+        else
+            printf("*");
+        userObj.password[i++] = (char)ch;
+    }
+    userObj.password[i] = '\0';
+
     fileSystem.open("data/users.bin", ios::app | ios::binary);
     fileSystem.write((char *)&userObj, sizeof(Users));
     fileSystem.close();
+    cout << endl
+         << endl
+         << endl;
     system("echo Registered successfully");
     Sleep(1000);
 }
